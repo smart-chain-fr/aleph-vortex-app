@@ -1,0 +1,412 @@
+version: 2.1
+orbs:
+  kubernetes: circleci/kubernetes@1.0.0
+  helm: circleci/helm@2.0.1
+
+parameters:
+  project-name:
+    type: string
+    description: Name of the global project, it will be used for the container registry, example -> minteed (has frontend and backend modules)
+    default: ## TO BE FILLED ##
+
+  project-module:
+    type: string
+    description: Name of the app or module of the project, it will be used for the container registry, for example minteed has a front and back app, example -> front
+    default: ## TO BE FILLED ##
+
+  dockerfile-location:
+    type: string
+    description: Location of the Dockerfile from the root of the repo
+    default: app ## TO BE CORRECTED IF NEEDED ##
+
+  project-helm-values:
+    type: string
+    description: Index of values in the helm chart values file containing the main values
+    default: ## TO BE FILLED ##
+
+  hors-prod-devops-path:
+    type: string
+    description: Path to the values for hors-prod cluster
+    default: ./devops/hors-prod.values.yaml ## TO BE CORRECTED IF NEEDED ##
+
+  ppd-devops-path:
+    type: string
+    description: Path to the values for ppd(prod) cluster
+    default: ./devops/ppd.values.yaml ## TO BE CORRECTED IF NEEDED ##
+
+  prod-devops-path:
+    type: string
+    description: Path to the values for prod cluster
+    default: ./devops/prod.values.yaml ## TO BE CORRECTED IF NEEDED ##
+
+########################################################
+################## DO NOT EDIT #########################
+########################################################
+  app:
+    type: boolean
+    description: This is the directory of the app, used to trigger app build & deploy
+    default: false 
+
+  devops: 
+    type: boolean 
+    description: This is the directory of the devops, used to trigger devops only deploy
+    default: false
+
+###################################################################
+################          COMMANDS          #######################
+###################################################################
+commands:
+  install-yq:
+    parameters:
+      version:
+        type: string
+        default: v4.27.3
+    steps:
+      - run:
+          name: Install YQ
+          command: >
+            curl -L -o ${HOME}/yq
+            https://github.com/mikefarah/yq/releases/download/<< parameters.version>>/yq_linux_amd64
+
+            chmod +x ${HOME}/yq
+
+            ${HOME}/yq --version
+
+###################################################################
+##################          JOBS          #########################
+###################################################################
+
+jobs:
+  
+  default: 
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run: 
+          name: Nothing to do
+          command: echo There is nothing to do 
+
+  verify-tag:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - install-yq
+      - run:
+          name: Extract TAG from Chart.yaml
+          command: echo "export TAG=$(${HOME}/yq '.appVersion' devops/Chart.yaml )" >> $BASH_ENV
+      - run:
+          name: Verify if TAG is in Chart.yaml
+          command: |
+            if [ -z "$TAG" ]
+            then
+              echo "Tag is either null or missformed (check documentation)"
+              exit 1
+            fi
+      - setup_remote_docker:
+          version: 20.10.12
+          docker_layer_caching: true
+      - run:
+          name: Login to SCW registry
+          command: docker login rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>> -u nologin -p $SCW_SECRET_KEY
+      - run:
+          name: Check if TAG already exists in registry
+          command: docker manifest inspect rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>>/<<pipeline.parameters.project-module>>:$TAG && exit 1 || echo 'TAG is available'
+      - run:
+          when: on_fail
+          command: echo 'Please review your tag'
+
+  run-gitleaks:
+    docker:
+      - image: zricethezav/gitleaks:v8.15.0
+    steps:
+      - checkout
+      - run: echo "KEY=etstest12786gcdfjv8gv.ewf24"
+      - run: 
+          name: Create scan directory
+          command: mkdir /tmp/gitleaks
+      - run: 
+          name: Starting scan
+          command: gitleaks detect --source . --log-opts "-p -n 1" -r /tmp/gitleaks/scan.json -v
+      - store_artifacts:
+          path: /tmp/gitleaks/scan.json
+
+
+  build-push-docker-image:
+    machine:
+      image: ubuntu-2004:202010-01
+    steps:
+      - checkout
+      - install-yq
+      - run:
+          name: Extract TAG from Chart.yaml
+          command: echo "export TAG=$(${HOME}/yq '.appVersion' devops/Chart.yaml )" >> $BASH_ENV
+      - run:
+          name: Login to SCW registry
+          command: docker login rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>> -u nologin -p $SCW_SECRET_KEY
+      - run:
+          name: Build image
+          command: docker build --tag rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>>/<<pipeline.parameters.project-module>>:$TAG <<pipeline.parameters.dockerfile-location>> | while read line; do echo "$(date +%T) > $line"; done;
+      - run:
+          name: Push image
+          command: docker push rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>>/<<pipeline.parameters.project-module>>:$TAG
+
+  deploy-staging:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - install-yq
+      - run:
+          name: Get namespace from repo url 
+          command: echo "export NAMESPACE=$(echo '<<pipeline.project.git_url>>' | sed 's:.*/::')">> $BASH_ENV
+      - run:
+          name: Slugify namespace from repo url 
+          command: echo "export NAMESPACE=$(echo $NAMESPACE | awk '{gsub(/[^0-9a-zA-Z .-]/,""); gsub(/^[ \t\r\n]+/, ""); gsub(/[ \t\r\n]+$/, ""); gsub(/[ ]+/,"-"); print tolower($0);}')">> $BASH_ENV
+      - run:
+          name: Extract TAG from Chart.yaml
+          command: echo "export TAG=$(${HOME}/yq '.appVersion' devops/Chart.yaml )" >> $BASH_ENV
+      - run:
+          name: Login to SCW registry
+          command: docker login rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>> -u nologin -p $SCW_SECRET_KEY
+      - run:
+          name: Verify if tag exists in registry 
+          command: docker manifest inspect rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>>/<<pipeline.parameters.project-module>>:$TAG
+      - kubernetes/install-kubeconfig:
+          kubeconfig: KUBECONFIG_DATA
+      - helm/install-helm-client
+      - run:
+          name: Deploy to staging
+          command: helm upgrade $NAMESPACE-stg ./devops -i -f << pipeline.parameters.hors-prod-devops-path >> -n $NAMESPACE-stg --create-namespace --set << pipeline.parameters.project-helm-values >>.image.tag=$TAG --set namespace=$NAMESPACE-stg --set << pipeline.parameters.project-helm-values >>.image.repository='rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>>/<<pipeline.parameters.project-module>>'
+
+  deploy-ppd:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - install-yq
+      - run:
+          name: Get name of project from repo url and create namespace name
+          command: echo "export NAMESPACE=$(echo '<<pipeline.project.git_url>>' | sed 's:.*/::')">> $BASH_ENV
+      - run:
+          name: Slugify namespace from repo url 
+          command: echo "export NAMESPACE=$(echo $NAMESPACE | awk '{gsub(/[^0-9a-zA-Z .-]/,""); gsub(/^[ \t\r\n]+/, ""); gsub(/[ \t\r\n]+$/, ""); gsub(/[ ]+/,"-"); print tolower($0);}')">> $BASH_ENV
+      - run:
+          name: Extract TAG from Chart.yaml
+          command: echo "export TAG=$(${HOME}/yq '.appVersion' devops/Chart.yaml )" >> $BASH_ENV
+      - run:
+          name: Login to SCW registry
+          command: docker login rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>> -u nologin -p $SCW_SECRET_KEY
+      - run:
+          name: Verify if tag exists in registry 
+          command: docker manifest inspect rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>>/<<pipeline.parameters.project-module>>:$TAG
+      - kubernetes/install-kubeconfig:
+          kubeconfig: KUBECONFIG_DATA
+      - helm/install-helm-client
+      - run:
+          name: Deploy to PreProduction
+          command: helm upgrade $NAMESPACE-ppd ./devops -i -f << pipeline.parameters.ppd-devops-path >> -n $NAMESPACE-ppd --create-namespace --set << pipeline.parameters.project-helm-values >>.image.tag=$TAG --set namespace=$NAMESPACE-ppd --set << pipeline.parameters.project-helm-values >>.image.repository='rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>>/<<pipeline.parameters.project-module>>'
+
+  deploy-prod:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - install-yq
+      - run:
+          name: Get name of project from repo url and create namespace name
+          command: echo "export NAMESPACE=$(echo '<<pipeline.project.git_url>>' | sed 's:.*/::')">> $BASH_ENV
+      - run:
+          name: Slugify namespace from repo url 
+          command: echo "export NAMESPACE=$(echo $NAMESPACE | awk '{gsub(/[^0-9a-zA-Z .-]/,""); gsub(/^[ \t\r\n]+/, ""); gsub(/[ \t\r\n]+$/, ""); gsub(/[ ]+/,"-"); print tolower($0);}')">> $BASH_ENV
+      - run:
+          name: Extract TAG from Chart.yaml
+          command: echo "export TAG=$(${HOME}/yq '.appVersion' devops/Chart.yaml )" >> $BASH_ENV
+      - run:
+          name: Login to SCW registry
+          command: docker login rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>> -u nologin -p $SCW_SECRET_KEY
+      - run:
+          name: Verify if tag exists in registry 
+          command: docker manifest inspect rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>>/<<pipeline.parameters.project-module>>:$TAG
+      - kubernetes/install-kubeconfig:
+          kubeconfig: KUBECONFIG_DATA
+      - helm/install-helm-client
+      - run:
+          name: Deploy to production
+          command: helm upgrade $NAMESPACE-prd ./devops -i -f << pipeline.parameters.prod-devops-path >> -n $NAMESPACE-prd --create-namespace --set << pipeline.parameters.project-helm-values >>.image.tag=$TAG --set namespace=$NAMESPACE-prd --set << pipeline.parameters.project-helm-values >>.image.repository='rg.fr-par.scw.cloud/<<pipeline.parameters.project-name>>/<<pipeline.parameters.project-module>>'
+
+
+###################################################################
+################          WORKFLOWS          ######################
+###################################################################
+
+
+workflows:
+  version: 2
+  build-push-deploy-staging:
+    when: <<pipeline.parameters.app>>
+    jobs:
+      - run-gitleaks:
+          filters: &filters-staging
+            branches:
+              only: staging
+          context: 
+            - staging
+      - verify-tag:
+          filters:
+            <<: *filters-staging
+          requires:
+            - run-gitleaks
+      - build-push-docker-image:
+          requires:
+            - verify-tag
+          context:
+            - staging
+          filters:
+            <<: *filters-staging
+      - deploy-staging:
+          filters:
+            <<: *filters-staging
+          requires:
+            - build-push-docker-image
+          context:
+            - staging
+
+  build-push-deploy-ppd:
+    when: <<pipeline.parameters.app>>
+    jobs:
+      - run-gitleaks:
+          filters: &filters-ppd
+            branches:
+              only: preprod
+          context: 
+            - production
+      - build-push-docker-image:
+          context:
+            - production
+          filters:
+            <<: *filters-ppd
+          requires:
+            - run-gitleaks
+      - validate-ppd-deploy:
+          requires:
+            - build-push-docker-image
+          type: approval
+      - deploy-ppd:
+          requires:
+            - validate-ppd-deploy
+          context:
+            - production
+          filters:
+            <<: *filters-ppd
+
+  build-push-deploy-production:
+    when: <<pipeline.parameters.app>>
+    jobs:
+      - run-gitleaks:
+          context:
+            - production
+          filters: &filters-production
+            branches: 
+              only: preprod
+      - build-push-docker-image:
+          context:
+            - production
+          filters:
+            <<: *filters-production
+          requires: 
+            - run-gitleaks
+      - validate-prod-deploy:
+          requires:
+            - build-push-docker-image
+          type: approval
+      - deploy-prod:
+          requires:
+            - validate-prod-deploy
+          context:
+            - production
+          filters:
+            <<: *filters-production
+
+  deploy-new-infra-config-stg:
+    when: 
+      and:
+        - <<pipeline.parameters.devops>>
+        - not: <<pipeline.parameters.app>>
+    jobs:
+      - run-gitleaks:
+          context:
+            - staging
+          filters:
+            <<: *filters-staging
+      - deploy-staging:
+          filters:
+            <<: *filters-staging
+          context:
+            - staging
+          requires: 
+            - run-gitleaks
+
+  deploy-new-infra-config-ppd:
+    when: 
+      and:
+        - <<pipeline.parameters.devops>>
+        - not: <<pipeline.parameters.app>>
+    jobs:
+      - run-gitleaks:
+          context:
+            - production
+          filters:
+            <<: *filters-ppd
+      - validate-ppd-deploy:
+          type: approval
+          filters:
+            <<: *filters-ppd
+          requires: 
+            - run-gitleaks
+      - deploy-ppd:
+          filters:
+            <<: *filters-ppd
+          requires:
+            - validate-ppd-deploy
+          context:
+            - production
+
+  deploy-new-infra-config-prd:
+    when: 
+      and:
+        - <<pipeline.parameters.devops>>
+        - not: <<pipeline.parameters.app>>
+    jobs:
+      - run-gitleaks:
+          context:
+            - production
+          filters:
+            <<: *filters-ppd
+      - validate-prod-deploy:
+          type: approval
+          filters:
+            <<: *filters-production
+          requires:
+            - run-gitleaks
+      - deploy-staging:
+          filters:
+            <<: *filters-production
+          requires:
+            - validate-prod-deploy
+          context:
+            - production
+
+  default: 
+    when: 
+      and: 
+        - not: <<pipeline.parameters.devops>>
+        - not: <<pipeline.parameters.app>>
+    jobs: 
+      - default:
+          filters: 
+            branches:
+              only: 
+                - staging 
+                - main
+                - preprod
