@@ -1,0 +1,13 @@
+__pycache__
+.env.dist
+.git
+.gitignore
+.python-version
+.vagrant
+data
+Dockerfile
+docker-compose.yml
+LICENSE.md
+Makefile
+README.md
+Vagrantfile
