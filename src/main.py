@@ -1,6 +1,7 @@
 import asyncio
 from utils.env import initEnvRpc, initEnvDatabase, initEnvContracts
 from utils.database import connectDatabase, disconnectDatabase, initDatabase
+from utils.graphql import startGraphqlServer
 from classes.indexer import Indexer
 from classes.contract.contract_dex import ContractDex
 from classes.contract.contract_token_smak import ContractTokenSmak
@@ -66,7 +67,7 @@ async def main() :
     disconnectDatabase(dbConnection)
 
     # Start the GraphQL server
-    # startGraphqlServer()
+    startGraphqlServer(dbConnection)
 
     print("Exiting the app...")
 

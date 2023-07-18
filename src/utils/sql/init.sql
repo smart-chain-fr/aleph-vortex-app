@@ -450,6 +450,5 @@ CREATE TABLE IF NOT EXISTS contract_farms_v2_allfarms (
     id SERIAL NOT NULL,
     factory INT,
     address TEXT,
-    CONSTRAINT contract_farms_v2_allfarms_pkey PRIMARY KEY (id),
-    CONSTRAINT contract_farms_v2_allfarms_factory_key FOREIGN KEY (factory) REFERENCES contract_farms_v2_storage (id)
+    CONSTRAINT contract_farms_v2_allfarms_pkey PRIMARY KEY (id)
 );

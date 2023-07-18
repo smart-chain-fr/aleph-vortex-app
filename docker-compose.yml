@@ -12,7 +12,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pg_isready --dbname=aleph-vortex-indexer --username=indexer"
+          "pg_isready --dbname=${PG_DATABASE:-changeme} --username=${PG_USERNAME:-changeme}"
         ]
       interval: 30s
       timeout: 5s
