@@ -26,4 +26,5 @@ RUN poetry install
 COPY . .
 
 # Run the application
-CMD ["poetry", "run", "python", "src/main.py"]
+# CMD ["poetry", "run", "python", "src/main.py"]
+CMD ["poetry", "run", "uvicorn", "main:app"]

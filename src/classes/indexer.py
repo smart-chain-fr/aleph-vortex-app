@@ -1,5 +1,5 @@
 from datetime import datetime
-from utils.tzkt import getIndexerStats
+from src.utils.tzkt import getIndexerStats
 
 class Indexer:
     def __init__(self, timestamp, level, totalSupply, circulatingSupply, totalBootstrapped, totalCommitments, totalActivated, totalCreated, totalBurned, totalBanished, totalFrozen, totalRollupBonds, totalSmartRollupBonds, totalVested):

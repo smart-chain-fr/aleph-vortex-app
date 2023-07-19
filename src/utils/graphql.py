@@ -2,15 +2,15 @@ import uvicorn
 import asyncio
 from tartiflette import Resolver, Engine
 from tartiflette_asgi import TartifletteApp
-from utils.env import initEnvDatabase
-from utils.database import connectDatabase
+from src.utils.env import initEnvDatabase
+from src.utils.database import connectDatabase
 
-async def startGraphqlServer() :
-    # # Specify the database connection details
-    # db_info : dict = await initEnvDatabase()
+def startGraphqlServer() :
+    # Specify the database connection details
+    db_info : dict = initEnvDatabase()
 
-    # # Connect to the database
-    # dbConnection = connectDatabase(db_info["host"][0], db_info["port"][0], db_info["database"][0], db_info["user"][0], db_info["password"])
+    # Connect to the database
+    dbConnection = connectDatabase(db_info["host"][0], db_info["port"][0], db_info["database"][0], db_info["user"][0], db_info["password"])
 
     # @Resolver("Query.contract_dex_storage")
     # async def contract_dex_storage(parent, args, ctx, info = None):
@@ -58,7 +58,4 @@ async def startGraphqlServer() :
     print("Starting the GraphQL Server...")
     engine = Engine(sdl=sdl)
     app = TartifletteApp(engine=engine, sdl=sdl, path="/api")
-    await asyncio.create_task(app.startup())
-
-    # await app.startup()
-    # await uvicorn.run(app, host="0.0.0.0", port=8000)
+    return app
