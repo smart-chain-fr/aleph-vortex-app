@@ -13,8 +13,6 @@ from classes.contract.contract_staking_smak import ContractStakingSmak
 from classes.contract.contract_farms_v1 import ContractFarmsV1
 from classes.contract.contract_farms_v2 import ContractFarmsV2
 
-print("ALEPH-DEX-INDEXER")
-
 async def main() :
     print("Starting the app...")
 
@@ -33,43 +31,43 @@ async def main() :
     # Initialize the database
     initDatabase(dbConnection)
 
-    # Insert Indexer state into the database
-    await Indexer.processIndexer(rpcEndpoint, dbConnection)
+    # # Insert Indexer state into the database
+    # await Indexer.processIndexer(rpcEndpoint, dbConnection)
 
-    # Get DEX contract storage and operations
-    await ContractDex.processContract(rpcEndpoint, dbConnection, contractsAddr["VORTEX"])
+    # # Get DEX contract storage and operations
+    # await ContractDex.processContract(rpcEndpoint, dbConnection, contractsAddr["VORTEX"])
 
-    # Get SMAK TOKEN contract storage and operations
-    await ContractTokenSmak.processContract(rpcEndpoint, dbConnection, contractsAddr["TOKEN_SMAK"])
+    # # Get SMAK TOKEN contract storage and operations
+    # await ContractTokenSmak.processContract(rpcEndpoint, dbConnection, contractsAddr["TOKEN_SMAK"])
 
-    # Get ANTI TOKEN contract storage and operations
-    await ContractTokenAnti.processContract(rpcEndpoint, dbConnection, contractsAddr["TOKEN_ANTI"])
+    # # Get ANTI TOKEN contract storage and operations
+    # await ContractTokenAnti.processContract(rpcEndpoint, dbConnection, contractsAddr["TOKEN_ANTI"])
 
-    # Get FA12 FACTORY contract storage and operations
-    await ContractFactoryFA12.processContract(rpcEndpoint, dbConnection, contractsAddr["FACTORY_FA12"])
+    # # Get FA12 FACTORY contract storage and operations
+    # await ContractFactoryFA12.processContract(rpcEndpoint, dbConnection, contractsAddr["FACTORY_FA12"])
 
-    # Get FA2 FACTORY contract storage and operations
-    await ContractFactoryFA2.processContract(rpcEndpoint, dbConnection, contractsAddr["FACTORY_FA2"])
+    # # Get FA2 FACTORY contract storage and operations
+    # await ContractFactoryFA2.processContract(rpcEndpoint, dbConnection, contractsAddr["FACTORY_FA2"])
 
-    # Get DOGA FACTORY contract storage and operations
-    await ContractFactoryDoga.processContract(rpcEndpoint, dbConnection, contractsAddr["FACTORY_DOGA"])
+    # # Get DOGA FACTORY contract storage and operations
+    # await ContractFactoryDoga.processContract(rpcEndpoint, dbConnection, contractsAddr["FACTORY_DOGA"])
 
-    # Get SMAK STAKING contract storage and operations
-    await ContractStakingSmak.processContract(rpcEndpoint, dbConnection, contractsAddr["STAKING_SMAK"])
+    # # Get SMAK STAKING contract storage and operations
+    # await ContractStakingSmak.processContract(rpcEndpoint, dbConnection, contractsAddr["STAKING_SMAK"])
 
-    # Get FARMS V1 contract storage and operations
-    await ContractFarmsV1.processContract(rpcEndpoint, dbConnection, contractsAddr["FARMS_V1"])
+    # # Get FARMS V1 contract storage and operations
+    # await ContractFarmsV1.processContract(rpcEndpoint, dbConnection, contractsAddr["FARMS_V1"])
 
-    # Get FARMS V2 contract storage and operations
-    await ContractFarmsV2.processContract(rpcEndpoint, dbConnection, contractsAddr["FARMS_V2"])
+    # # Get FARMS V2 contract storage and operations
+    # await ContractFarmsV2.processContract(rpcEndpoint, dbConnection, contractsAddr["FARMS_V2"])
+
+    # await startGraphqlServer(dbConnection)
 
     # Disconnect from the database
     disconnectDatabase(dbConnection)
 
-    # Start the GraphQL server
-    startGraphqlServer(dbConnection)
-
     print("Exiting the app...")
 
-print("Executing Asyncio...")
-asyncio.run(main())
+loop = asyncio.new_event_loop()
+loop.run_until_complete(main())
+loop.run_until_complete(startGraphqlServer())

@@ -3,10 +3,8 @@ from environs import Env
 env = Env()
 env.read_env()
 
-
 async def initEnv() -> tuple[str, dict, dict] :
-    return initEnvRpc(), initEnvDatabase(), initEnvContracts()
-
+    return await initEnvRpc(), await initEnvDatabase(), await initEnvContracts()
 
 async def initEnvRpc() -> str:
     try:

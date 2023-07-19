@@ -18,20 +18,20 @@ services:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:7.3
-    depends_on:
-      - postgres
-    ports:
-      - ${PGA_PORT:-changeme}:${PGA_PORT:-changeme}
-    restart: no
-    volumes:
-      - ./volumes/pgadmin4:/volumes/pgadmin4
-    environment:
-      - PGADMIN_LISTEN_PORT=${PGA_PORT:-changeme}
-      - PGADMIN_DEFAULT_EMAIL=${PGA_USERNAME:-changeme}
-      - PGADMIN_DEFAULT_PASSWORD=${PGA_PASSWORD:-changeme}
-      - PGADMIN_SERVER_JSON_FILE=/volumes/pgadmin4/servers.json
+  # pgadmin:
+  #   image: dpage/pgadmin4:7.3
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - ${PGA_PORT:-changeme}:${PGA_PORT:-changeme}
+  #   restart: no
+  #   volumes:
+  #     - ./volumes/pgadmin4:/volumes/pgadmin4
+  #   environment:
+  #     - PGADMIN_LISTEN_PORT=${PGA_PORT:-changeme}
+  #     - PGADMIN_DEFAULT_EMAIL=${PGA_USERNAME:-changeme}
+  #     - PGADMIN_DEFAULT_PASSWORD=${PGA_PASSWORD:-changeme}
+  #     - PGADMIN_SERVER_JSON_FILE=/volumes/pgadmin4/servers.json
 
   # hasura:
   #   image: hasura/graphql-engine:v2.20.0
