@@ -1,28 +1,8 @@
 from tartiflette import Resolver, Engine
 from tartiflette_asgi import TartifletteApp
-from utils.database import connectDatabase
 import uvicorn
 
 def startGraphqlServer(dbConnection) :
-
-    # # Define the GraphQL schema
-    # sdl = """
-    # type User {
-    #     id: Int!
-    #     name: String!
-    # }
-
-    # type Query {
-    #     users: [User]
-    # }
-    # """
-
-    # # Create a Tartiflette engine with the defined schema and resolvers
-    # engine = Engine(sdl=sdl)
-
-    # # Create a TartifletteApp instance with the engine
-    # app = TartifletteApp(engine=engine)
-
     @Resolver("Query.contract_dex_storage")
     async def contract_dex_storage(parent, args, ctx, info = None):
         id = args["id"]

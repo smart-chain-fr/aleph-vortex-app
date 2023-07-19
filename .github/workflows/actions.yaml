@@ -1,9 +1,17 @@
-# Write a Github Actions workflow to build the Docker image
-on: push
+on:
+  push:
+    branches:
+      - main
+      - development
+  pull_request:
+    branches:
+      - main
+      - development
+
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: Build the Docker image
-          run: docker build -f Dockerfile -t aleph-vortex-app .
+  build:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - name: Build the Docker image
+        run: docker build -f Dockerfile -t aleph-vortex-app .
