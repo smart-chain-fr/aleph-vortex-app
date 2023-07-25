@@ -9,13 +9,11 @@ readme = "README.md"
 python = ">=3.8,<3.12"
 requests = "^2.31.0"
 environs = "^9.5.0"
-fastapi = "^0.99.1"
 tartiflette-asgi = "^0.12.0"
-uvicorn = "^0.22.0"
+uvicorn = "^0.22.0"p
 psycopg2-binary = "^2.9.6"
 asyncio = "^3.4.3"
 tartiflette = "^1.4.1"
-asyncpg = "^0.28.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -51,12 +51,12 @@ If you wish to test the app locally, make sure your `.env` file is correctly set
 Then you can run the following commands :
 
 ```bash
-apt-get update
-apt-get install -y git g++ gcc pkg-config make cmake m4 libgmp-dev libsodium-dev libsecp256k1-dev
+sudo apt-get update
+sudo apt-get install -y git g++ gcc pkg-config make cmake m4 libgmp-dev libsodium-dev libsecp256k1-dev
 pip install --upgrade pip==23.1.2
 pip install poetry==1.5.1
 poetry install
-poetry python run src/main.py
+poetry poetry run uvicorn main:app
 ```
 
 ___

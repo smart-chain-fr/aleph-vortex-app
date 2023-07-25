@@ -33,37 +33,46 @@ async def main() :
 
     # Insert Indexer state into the database
     await Indexer.processIndexer(rpcEndpoint, dbConnection)
+    print("[Indexer.processIndexer] Indexer state inserted into the database")
 
     # Get DEX contract storage and operations
     await ContractDex.processContract(rpcEndpoint, dbConnection, contractsAddr["VORTEX"])
+    print("[ContractDex.processContract] DEX contract storage and operations inserted into the database")
 
     # Get SMAK TOKEN contract storage and operations
     await ContractTokenSmak.processContract(rpcEndpoint, dbConnection, contractsAddr["TOKEN_SMAK"])
+    print("[ContractTokenSmak.processContract] SMAK TOKEN contract storage and operations inserted into the database")
 
     # Get ANTI TOKEN contract storage and operations
     await ContractTokenAnti.processContract(rpcEndpoint, dbConnection, contractsAddr["TOKEN_ANTI"])
+    print("[ContractTokenAnti.processContract] ANTI TOKEN contract storage and operations inserted into the database")
 
     # Get FA12 FACTORY contract storage and operations
     await ContractFactoryFA12.processContract(rpcEndpoint, dbConnection, contractsAddr["FACTORY_FA12"])
+    print("[ContractFactoryFA12.processContract] FA12 FACTORY contract storage and operations inserted into the database")
 
     # Get FA2 FACTORY contract storage and operations
     await ContractFactoryFA2.processContract(rpcEndpoint, dbConnection, contractsAddr["FACTORY_FA2"])
+    print("[ContractFactoryFA2.processContract] FA2 FACTORY contract storage and operations inserted into the database")
 
     # Get DOGA FACTORY contract storage and operations
     await ContractFactoryDoga.processContract(rpcEndpoint, dbConnection, contractsAddr["FACTORY_DOGA"])
+    print("[ContractFactoryDoga.processContract] DOGA FACTORY contract storage and operations inserted into the database")
 
     # Get SMAK STAKING contract storage and operations
     await ContractStakingSmak.processContract(rpcEndpoint, dbConnection, contractsAddr["STAKING_SMAK"])
+    print("[ContractStakingSmak.processContract] SMAK STAKING contract storage and operations inserted into the database")
 
     # Get FARMS V1 contract storage and operations
     await ContractFarmsV1.processContract(rpcEndpoint, dbConnection, contractsAddr["FARMS_V1"])
+    print("[ContractFarmsV1.processContract] FARMS V1 contract storage and operations inserted into the database")
 
     # Get FARMS V2 contract storage and operations
     await ContractFarmsV2.processContract(rpcEndpoint, dbConnection, contractsAddr["FARMS_V2"])
+    print("[ContractFarmsV2.processContract] FARMS V2 contract storage and operations inserted into the database")
 
     # Disconnect from the database
     disconnectDatabase(dbConnection)
-
     print("Exiting the app...")
 
 # start with uvicorn commandline

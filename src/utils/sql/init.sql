@@ -404,6 +404,13 @@ CREATE TABLE IF NOT EXISTS contract_farms_v1_operations (
     eventsCount BIGINT DEFAULT 0,
     CONSTRAINT contract_farms_v1_pkey PRIMARY KEY (id)
 );
+DROP TABLE IF EXISTS contract_farms_v1_allfarms;
+CREATE TABLE IF NOT EXISTS contract_farms_v1_allfarms (
+    id SERIAL NOT NULL,
+    factory INT,
+    address TEXT,
+    CONSTRAINT contract_farms_v1_allfarms_pkey PRIMARY KEY (id)
+);
 
 -- CONTRACT : VORTEX_FARMS_V2
 DROP TABLE IF EXISTS contract_farms_v2_storage;

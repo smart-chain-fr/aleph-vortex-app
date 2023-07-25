@@ -22,31 +22,6 @@ class Indexer:
     def from_dict(self, data) :
         return self(**data)
 
-    # @staticmethod
-    # def createTable(connection):
-    #     query = '''
-    #         CREATE TABLE IF NOT EXISTS indexer (
-    #             level INTEGER,
-    #             totalSupply INTEGER,
-    #             circulatingSupply INTEGER,
-    #             totalBootstrapped INTEGER,
-    #             totalCommitments INTEGER,
-    #             totalActivated INTEGER,
-    #             totalCreated INTEGER,
-    #             totalBurned INTEGER,
-    #             totalBanished INTEGER,
-    #             totalFrozen INTEGER,
-    #             totalRollupBonds INTEGER,
-    #             totalSmartRollupBonds INTEGER,
-    #             totalVested INTEGER,
-    #             CONSTRAINT indexer_pkey PRIMARY KEY (timestamp)
-    #         );
-    #     '''
-    #     cursor = connection.cursor()
-    #     cursor.execute(query)
-    #     connection.commit()
-    #     cursor.close()
-
     async def insert_into_db(self, connection):
         query = '''
             INSERT INTO indexer (
