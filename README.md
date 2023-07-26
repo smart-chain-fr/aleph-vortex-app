@@ -2,7 +2,11 @@
 
 Python-based application designed to index and expose data from the Vortex DEX on Aleph.im protocol.
 
-This application stores the indexed data in a Postgres database, and exposes it via a GraphQL server.
+The application saves the storage of the indexed contracts, and their respective operations.
+
+Note that the application provides a formatted storage for these contracts, from the raw data of [TZKT's API](https://api.tzkt.io).
+
+This application stores the indexed data in a Postgres database, and exposes it via a GraphQL server at the path `http://localhost:8000/graphql`.
 
 ## Indexed contracts :
 
@@ -25,13 +29,13 @@ SMAK STAKING @ "KT1TR4qabnDU6aAUym6nauSGaRwJpoKU3efP"
 # Farming :
 Farms V1 @ "KT1QF1kK7WD8gMVrcE3P2FVFFQnKV2a4JwgU"
 Farms V2 @ "KT1GDqyEpUk7zE227M66eLPR4evVa1vjjvQY"
-``````
+```
 
 ## Running the app via Docker-Compose :
 
 If you wish to test the app locally via Docker, make sure your `.env` file is correctly setup.
 
-Make sure the `PG_HOST` is set to the name of the correpsonding service in the `Docker-compose.yaml`` :
+Make sure the `PG_HOST` is set to the name of the corresponding service in the `Docker-compose.yaml` :
 
 ```bash
 ## POSTGRES
@@ -98,23 +102,23 @@ VMs can be extended by specifying additional volumes that will be mounted in the
 
 After installing [aleph-client](https://github.com/aleph-im/aleph-client), you should have access to the `aleph` command:
 
-```shell
+```bash
 aleph --help
 ```
 
 Upload your program:
 
-```shell
+```bash
 aleph program ./src main:app
 ```
 
 Press `Enter` to skip adding extra volumes to your program:
-```shell
+```bash
 Add volume ? [y/N]
 ```
 
 You should then get a response similar to the following:
-```
+```bash
 Your program has been uploaded on Aleph.
 
 Available on:
@@ -144,7 +148,7 @@ While Aleph messages cannot be edited, there is a solution to this issue: you ca
 
 The `aleph update` command is similar to `aleph program`, except it requires the hash of the program to update.
 
-```shell
+```bash
 aleph update $HASH ./src
 ```
 
