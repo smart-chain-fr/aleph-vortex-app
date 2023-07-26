@@ -1,5 +1,5 @@
 from datetime import datetime
-from utils.tzkt import getIndexerStats
+from src.utils.tzkt import getIndexerStats
 
 class Indexer:
     def __init__(self, timestamp, level, totalSupply, circulatingSupply, totalBootstrapped, totalCommitments, totalActivated, totalCreated, totalBurned, totalBanished, totalFrozen, totalRollupBonds, totalSmartRollupBonds, totalVested):
@@ -21,31 +21,6 @@ class Indexer:
     @classmethod
     def from_dict(self, data) :
         return self(**data)
-
-    # @staticmethod
-    # def createTable(connection):
-    #     query = '''
-    #         CREATE TABLE IF NOT EXISTS indexer (
-    #             level INTEGER,
-    #             totalSupply INTEGER,
-    #             circulatingSupply INTEGER,
-    #             totalBootstrapped INTEGER,
-    #             totalCommitments INTEGER,
-    #             totalActivated INTEGER,
-    #             totalCreated INTEGER,
-    #             totalBurned INTEGER,
-    #             totalBanished INTEGER,
-    #             totalFrozen INTEGER,
-    #             totalRollupBonds INTEGER,
-    #             totalSmartRollupBonds INTEGER,
-    #             totalVested INTEGER,
-    #             CONSTRAINT indexer_pkey PRIMARY KEY (timestamp)
-    #         );
-    #     '''
-    #     cursor = connection.cursor()
-    #     cursor.execute(query)
-    #     connection.commit()
-    #     cursor.close()
 
     async def insert_into_db(self, connection):
         query = '''

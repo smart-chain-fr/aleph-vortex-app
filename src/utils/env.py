@@ -3,12 +3,10 @@ from environs import Env
 env = Env()
 env.read_env()
 
-
-async def initEnv() -> tuple[str, dict, dict] :
+def initEnv() -> tuple[str, dict, dict] :
     return initEnvRpc(), initEnvDatabase(), initEnvContracts()
 
-
-async def initEnvRpc() -> str:
+def initEnvRpc() -> str:
     try:
         rpcEndpoint = env.str("RPC_ENDPOINT")
     except Exception as e:
@@ -17,7 +15,7 @@ async def initEnvRpc() -> str:
     return rpcEndpoint
 
 
-async def initEnvDatabase() -> dict :
+def initEnvDatabase() -> dict :
     db_info = {}
     try:
         db_info["host"] = env.str("PG_HOST"),
@@ -31,7 +29,7 @@ async def initEnvDatabase() -> dict :
     return db_info
 
 
-async def initEnvContracts() -> dict:
+def initEnvContracts() -> dict:
     contractsAddr = {}
     try:
         contractsAddr["VORTEX"] = env.str("VORTEX")

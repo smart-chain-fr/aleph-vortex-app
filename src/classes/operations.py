@@ -37,45 +37,6 @@ class ContractOperation:
     def from_dict(cls, data):
         return cls(**data)
 
-    # @staticmethod
-    # def createTable(connection, table_name):
-    #     query = '''
-    #         DROP TABLE IF EXISTS '''+ table_name +''';
-    #         CREATE TABLE IF NOT EXISTS '''+ table_name +''' (
-    #             id SERIAL NOT NULL,
-    #             type TEXT,
-    #             level INTEGER,
-    #             timestamp TIMESTAMP,
-    #             block TEXT,
-    #             hash TEXT,
-    #             counter INTEGER,
-    #             sender TEXT,
-    #             gasLimit INTEGER,
-    #             gasUsed INTEGER,
-    #             storageLimit INTEGER,
-    #             storageUsed INTEGER,
-    #             bakerFee INTEGER,
-    #             storageFee INTEGER,
-    #             allocationFee INTEGER,
-    #             target TEXT,
-    #             amount BIGINT,
-    #             status TEXT,
-    #             hasInternals BOOLEAN,
-    #             initiator TEXT DEFAULT '',
-    #             nonce INTEGER DEFAULT 0,
-    #             parameter TEXT DEFAULT '',
-    #             senderCodeHash INTEGER DEFAULT 0,
-    #             targetCodeHash INTEGER DEFAULT 0,
-    #             tokenTransfersCount INTEGER DEFAULT 0,
-    #             errors TEXT DEFAULT '',
-    #             CONSTRAINT '''+ table_name +'''_pkey PRIMARY KEY (id)
-    #         )
-    #     '''
-    #     cursor = connection.cursor()
-    #     cursor.execute(query)
-    #     connection.commit()
-    #     cursor.close()
-
     async def insert_into_db(cls, connection, table_name):
         query = '''
             INSERT INTO '''+ table_name +''' (

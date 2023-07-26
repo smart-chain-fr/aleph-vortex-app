@@ -7,13 +7,6 @@ WORKDIR /app
 RUN apt-get update
 RUN apt-get install -y git g++ gcc pkg-config make cmake m4 libgmp-dev libsodium-dev libsecp256k1-dev
 
-# # Create a new user
-# RUN useradd -m -s /bin/bash smartchain
-# RUN chown -R smartchain:smartchain /app
-
-# # Switch to the new user
-# USER smartchain
-
 # Set the working directory for the application code
 WORKDIR /app/aleph-vortex-app
 
@@ -26,4 +19,4 @@ RUN poetry install
 COPY . .
 
 # Run the application
-CMD ["poetry", "run", "python", "src/main.py"]
+CMD ["poetry", "run", "uvicorn", "main:app"]
