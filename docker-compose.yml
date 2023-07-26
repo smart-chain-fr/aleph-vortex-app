@@ -12,7 +12,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pg_isready --dbname=aleph-vortex-indexer --username=indexer"
+          "pg_isready --dbname=${PG_DATABASE:-changeme} --username=${PG_USERNAME:-changeme}"
         ]
       interval: 30s
       timeout: 5s
@@ -33,20 +33,20 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=${PGA_PASSWORD:-changeme}
       - PGADMIN_SERVER_JSON_FILE=/volumes/pgadmin4/servers.json
 
-  # hasura:
-  #   image: hasura/graphql-engine:v2.20.0
-  #   ports:
-  #     - ${HSR_PORT:-changeme}:${HSR_PORT:-changeme}
-  #   depends_on:
-  #     - postgres
-  #   restart: always
-  #   environment:
-  #     - HASURA_GRAPHQL_DATABASE_URL=postgres://${PG_USERNAME:-changeme}:${PG_PASSWORD:-changeme}@postgres:${PG_PORT:-changeme}/${PG_DATABASE:-changeme}
-  #     - HASURA_GRAPHQL_ADMIN_SECRET=${HSR_GRAPHQL_ADMIN_SECRET:-changeme}
-  #     - HASURA_GRAPHQL_ENABLE_CONSOLE=true
-  #     - HASURA_GRAPHQL_DEV_MODE=false
-  #     - HASURA_GRAPHQL_ENABLED_LOG_TYPES=startup, http-log, webhook-log, websocket-log, query-log
-  #     - HASURA_GRAPHQL_ENABLE_TELEMETRY=false
+  hasura:
+    image: hasura/graphql-engine:v2.30.1
+    ports:
+      - ${HSR_PORT:-changeme}:${HSR_PORT:-changeme}
+    depends_on:
+      - postgres
+    restart: always
+    environment:
+      - HASURA_GRAPHQL_DATABASE_URL=postgres://${PG_USERNAME:-changeme}:${PG_PASSWORD:-changeme}@postgres:${PG_PORT:-changeme}/${PG_DATABASE:-changeme}
+      - HASURA_GRAPHQL_ADMIN_SECRET=${HSR_GRAPHQL_ADMIN_SECRET:-changeme}
+      - HASURA_GRAPHQL_ENABLE_CONSOLE=true
+      - HASURA_GRAPHQL_DEV_MODE=false
+      - HASURA_GRAPHQL_ENABLED_LOG_TYPES=startup, http-log, webhook-log, websocket-log, query-log
+      - HASURA_GRAPHQL_ENABLE_TELEMETRY=false
 
   indexer:
     build:

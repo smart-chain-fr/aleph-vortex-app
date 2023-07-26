@@ -1,5 +1,5 @@
-from classes.operations import ContractOperation
-from utils.tzkt import (
+from src.classes.operations import ContractOperation
+from src.utils.tzkt import (
     getContractStorage,
     getContractOperationCount,
     getContractOperations,

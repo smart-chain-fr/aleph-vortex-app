@@ -8,9 +8,9 @@ async def getIndexerStats(rpc) -> list:
         if response.status_code == 200:
             result = response.json()
         else:
-            raise Exception(f'getIndexerHead failed with status code: {response.status_code}')
+            raise Exception(f'getIndexerStats failed with status code: {response.status_code}')
     except requests.exceptions.RequestException as e:
-        raise Exception('[getIndexerHead] An error occurred:', str(e))
+        raise Exception('[getIndexerStats] An error occurred:', str(e))
     return result
 
 async def getContractStorage(rpc, address):
